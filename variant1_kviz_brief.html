@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бриф на разработку — рассчитайте проект за 2 минуты</title>
+<style>
+  /* ============================================================
+     ДИЗАЙН-СИСТЕМА: белый + жёлтый (Tinkoff-стиль), чёрная типографика
+     ============================================================ */
+  :root{
+    --yellow:#FFDD2D;
+    --yellow-dim:#FFF3B8;
+    --ink:#111214;
+    --ink-soft:#4A4C52;
+    --paper:#FFFFFF;
+    --grey-bg:#F5F5F2;
+    --line:#E7E6E1;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter','Segoe UI',system-ui,sans-serif;
+    background:var(--grey-bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important}
+  }
+
+  .wrap{max-width:1060px;margin:0 auto;padding:32px 20px 80px}
+
+  /* ---------- Шапка ---------- */
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px}
+  .logo{font-weight:900;font-size:20px;letter-spacing:-0.5px}
+  .logo span{background:var(--yellow);padding:2px 8px;border-radius:8px}
+  .header-note{font-size:13px;color:var(--ink-soft)}
+
+  /* ---------- Сетка: квиз + калькулятор ---------- */
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--paper);
+    border-radius:var(--radius);
+    padding:36px;
+    box-shadow:0 2px 12px rgba(17,18,20,.05);
+  }
+  @media(max-width:560px){.card{padding:24px 18px}}
+
+  /* ---------- Прогресс ---------- */
+  .progress{display:flex;gap:6px;margin-bottom:28px}
+  .progress i{flex:1;height:6px;border-radius:3px;background:var(--line);transition:background .3s}
+  .progress i.done{background:var(--yellow)}
+
+  .step{display:none;animation:fadeIn .35s ease}
+  .step.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px}
+  h2{font-size:clamp(22px,3.4vw,30px);font-weight:900;letter-spacing:-0.8px;line-height:1.15;margin-bottom:8px}
+  .hint{font-size:15px;color:var(--ink-soft);margin-bottom:26px;line-height:1.5}
+
+  /* ---------- Варианты-карточки ---------- */
+  .options{display:grid;gap:12px}
+  .options.two{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .opt{
+    border:2px solid var(--line);
+    border-radius:16px;
+    padding:18px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s, transform .1s;
+    user-select:none;
+    background:var(--paper);
+  }
+  .opt:hover{border-color:var(--ink)}
+  .opt:active{transform:scale(.985)}
+  .opt.sel{border-color:var(--ink);background:var(--yellow-dim)}
+  .opt .t{font-weight:700;font-size:16px;display:flex;align-items:center;gap:10px}
+  .opt .t .emoji{font-size:22px}
+  .opt .d{font-size:13.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45}
+  .opt .price-tag{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:700;background:var(--yellow);padding:3px 9px;border-radius:7px}
+
+  /* чипсы для мультивыбора */
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{
+    border:2px solid var(--line);border-radius:999px;padding:10px 18px;
+    font-size:14.5px;font-weight:600;cursor:pointer;user-select:none;
+    transition:border-color .15s, background .15s;background:var(--paper);
+  }
+  .chip:hover{border-color:var(--ink)}
+  .chip.sel{border-color:var(--ink);background:var(--yellow)}
+
+  /* ---------- Слайдер срочности ---------- */
+  .slider-block{margin-top:8px}
+  input[type=range]{width:100%;accent-color:var(--ink);height:34px}
+  .slider-labels{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);font-weight:600}
+
+  /* ---------- Поля ---------- */
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:7px}
+  .field input,.field textarea{
+    width:100%;border:2px solid var(--line);border-radius:14px;
+    padding:13px 16px;font-size:15px;font-family:inherit;background:var(--paper);
+    transition:border-color .15s;
+  }
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--ink)}
+  .field textarea{resize:vertical;min-height:90px}
+  .field .err{border-color:#E5484D!important}
+  .err-msg{color:#E5484D;font-size:12.5px;margin-top:5px;display:none}
+
+  /* ---------- Кнопки ---------- */
+  .nav{display:flex;gap:12px;margin-top:30px}
+  .btn{
+    border:none;border-radius:14px;padding:15px 28px;font-size:15.5px;font-weight:800;
+    cursor:pointer;font-family:inherit;transition:transform .1s, opacity .15s;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+  .btn-main{background:var(--ink);color:#fff;flex:1}
+  .btn-main:hover{opacity:.88}
+  .btn-ghost{background:transparent;color:var(--ink-soft)}
+  .btn-ghost:hover{color:var(--ink)}
+  .btn-yellow{background:var(--yellow);color:var(--ink);flex:1}
+  .btn-yellow:hover{opacity:.9}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+
+  /* ---------- Калькулятор (сайдбар) ---------- */
+  .calc{
+    position:sticky;top:24px;
+    background:var(--ink);color:#fff;border-radius:var(--radius);padding:28px;
+  }
+  .calc .eyebrow{color:#9a9ba1}
+  .calc-price{font-size:clamp(30px,4vw,40px);font-weight:900;letter-spacing:-1.5px;margin:6px 0 2px;
+    font-variant-numeric:tabular-nums}
+  .calc-price .from{font-size:16px;font-weight:600;color:#9a9ba1;letter-spacing:0}
+  .calc-sub{font-size:12.5px;color:#9a9ba1;margin-bottom:20px}
+  .calc-lines{border-top:1px solid #2c2d31;padding-top:16px;display:flex;flex-direction:column;gap:10px}
+  .calc-line{display:flex;justify-content:space-between;font-size:13.5px;gap:12px}
+  .calc-line .n{color:#c9cad0}
+  .calc-line .v{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .calc-empty{font-size:13.5px;color:#7a7b81;line-height:1.5}
+  .calc-badge{margin-top:20px;background:var(--yellow);color:var(--ink);border-radius:12px;
+    padding:12px 14px;font-size:12.5px;font-weight:700;line-height:1.45}
+  @media(max-width:860px){.calc{position:static}}
+
+  /* ---------- Итоговый экран ---------- */
+  .summary{background:var(--grey-bg);border-radius:16px;padding:20px;margin-bottom:24px}
+  .summary .row{display:flex;justify-content:space-between;gap:16px;padding:8px 0;
+    border-bottom:1px solid var(--line);font-size:14px}
+  .summary .row:last-child{border-bottom:none}
+  .summary .k{color:var(--ink-soft)}
+  .summary .v{font-weight:700;text-align:right;max-width:60%}
+
+  /* ---------- Успех ---------- */
+  .success{text-align:center;padding:30px 10px}
+  .success .big{font-size:64px;margin-bottom:14px}
+  .success h2{margin-bottom:12px}
+  .success p{color:var(--ink-soft);font-size:15.5px;line-height:1.6;max-width:420px;margin:0 auto}
+
+  .spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">брифуй<span>.про</span></div>
+    <div class="header-note">2 минуты · без звонков · цена сразу</div>
+  </header>
+
+  <div class="grid">
+    <!-- ================= КВИЗ ================= -->
+    <div class="card">
+      <div class="progress" id="progress"></div>
+
+      <!-- ШАГ 1 -->
+      <section class="step active" data-step="0">
+        <div class="eyebrow">Шаг 1 из 6</div>
+        <h2>Что вам нужно сделать?</h2>
+        <p class="hint">Выберите один вариант. Если не уверены — выбирайте ближайший, уточним потом.</p>
+        <div class="options two" id="q-type">
+          <div class="opt" data-val="Сайт" data-price="60000">
+            <div class="t"><span class="emoji">🌐</span>Сайт</div>
+            <div class="d">Лендинг, сайт-визитка или интернет-магазин</div>
+            <span class="price-tag">от 60 000 ₽</span>
+          </div>
+          <div class="opt" data-val="Телеграм-бот" data-price="45000">
+            <div class="t"><span class="emoji">🤖</span>Телеграм-бот</div>
+            <div class="d">Приём заявок, продажи, поддержка клиентов, рассылки</div>
+            <span class="price-tag">от 45 000 ₽</span>
+          </div>
+          <div class="opt" data-val="Автоматизация" data-price="50000">
+            <div class="t"><span class="emoji">⚙️</span>Автоматизация</div>
+            <div class="d">Связать сервисы между собой, убрать ручную рутину</div>
+            <span class="price-tag">от 50 000 ₽</span>
+          </div>
+          <div class="opt" data-val="Внедрение ИИ" data-price="70000">
+            <div class="t"><span class="emoji">✨</span>Внедрение ИИ</div>
+            <div class="d">Нейросеть отвечает клиентам, пишет тексты, анализирует данные</div>
+            <span class="price-tag">от 70 000 ₽</span>
+          </div>
+          <div class="opt" data-val="Парсинг данных" data-price="40000">
+            <div class="t"><span class="emoji">📊</span>Сбор данных</div>
+            <div class="d">Автоматически собирать цены, объявления, контакты с сайтов</div>
+            <span class="price-tag">от 40 000 ₽</span>
+          </div>
+          <div class="opt" data-val="Не знаю, нужна консультация" data-price="0">
+            <div class="t"><span class="emoji">💬</span>Пока не знаю</div>
+            <div class="d">Расскажу задачу — предложите решение</div>
+            <span class="price-tag">бесплатная оценка</span>
+          </div>
+        </div>
+        <div class="nav">
+          <button class="btn btn-main" onclick="next()" id="btn-1" disabled>Дальше →</button>
+        </div>
+      </section>
+
+      <!-- ШАГ 2 -->
+      <section class="step" data-step="1">
+        <div class="eyebrow">Шаг 2 из 6</div>
+        <h2>Какие задачи это должно решать?</h2>
+        <p class="hint">Можно выбрать несколько. Каждый пункт — это функция, которую я заложу в проект.</p>
+        <div class="chips" id="q-tasks">
+          <div class="chip" data-val="Принимать заявки от клиентов" data-price="0">📥 Принимать заявки</div>
+          <div class="chip" data-val="Принимать оплату" data-price="15000">💳 Принимать оплату</div>
+          <div class="chip" data-val="Отвечать клиентам автоматически" data-price="20000">💬 Автоответы клиентам</div>
+          <div class="chip" data-val="Показывать каталог товаров/услуг" data-price="12000">🛍 Каталог товаров/услуг</div>
+          <div class="chip" data-val="Записывать на услуги по расписанию" data-price="15000">📅 Запись по расписанию</div>
+          <div class="chip" data-val="Делать рассылки" data-price="10000">📣 Рассылки</div>
+          <div class="chip" data-val="Собирать данные с сайтов" data-price="15000">🔎 Сбор данных</div>
+          <div class="chip" data-val="Вести учёт в таблицах/CRM" data-price="12000">📋 Учёт в таблицах / CRM</div>
+          <div class="chip" data-val="Генерировать тексты/картинки нейросетью" data-price="20000">✨ Генерация ИИ</div>
+          <div class="chip" data-val="Другое (опишу в комментарии)" data-price="0">✍️ Другое</div>
+        </div>
+        <div class="nav">
+          <button class="btn btn-ghost" onclick="prev()">← Назад</button>
+          <button class="btn btn-main" onclick="next()">Дальше →</button>
+        </div>
+      </section>
+
+      <!-- ШАГ 3 -->
+      <section class="step" data-step="2">
+        <div class="eyebrow">Шаг 3 из 6</div>
+        <h2>Что у вас уже есть?</h2>
+        <p class="hint">Это влияет на объём работы: иногда проще доработать готовое, чем строить с нуля.</p>
+        <div class="options" id="q-have">
+          <div class="opt" data-val="Ничего, начинаем с нуля" data-price="0">
+            <div class="t"><span class="emoji">🆕</span>Ничего — начинаем с нуля</div>
+          </div>
+          <div class="opt" data-val="Есть сайт" data-price="0">
+            <div class="t"><span class="emoji">🌐</span>Есть сайт</div>
+            <div class="d">Нужно доработать или подключить к нему что-то новое</div>
+          </div>
+          <div class="opt" data-val="Есть таблицы / CRM" data-price="0">
+            <div class="t"><span class="emoji">📋</span>Есть таблицы или CRM</div>
+            <div class="d">Данные уже ведутся, нужно с ними подружиться</div>
+          </div>
+          <div class="opt" data-val="Есть бот / автоматизация, нужна доработка" data-price="-10000">
+            <div class="t"><span class="emoji">🔧</span>Есть бот или автоматизация</div>
+            <div class="d">Нужно починить, улучшить или расширить</div>
+          </div>
+        </div>
+        <div class="nav">
+          <button class="btn btn-ghost" onclick="prev()">← Назад</button>
+          <button class="btn btn-main" onclick="next()" id="btn-3" disabled>Дальше →</button>
+        </div>
+      </section>
+
+      <!-- ШАГ 4 -->
+      <section class="step" data-step="3">
+        <div class="eyebrow">Шаг 4 из 6</div>
+        <h2>С чем нужно связать?</h2>
+        <p class="hint">Отметьте сервисы, которые уже используете или планируете. Если ничего — просто нажмите «Дальше».</p>
+        <div class="chips" id="q-integr">
+          <div class="chip" data-val="Telegram" data-price="8000">Telegram</div>
+          <div class="chip" data-val="WhatsApp" data-price="12000">WhatsApp</div>
+          <div class="chip" data-val="Google Таблицы" data-price="8000">Google Таблицы</div>
+          <div class="chip" data-val="Оплата (ЮKassa и др.)" data-price="15000">Оплата (ЮKassa и др.)</div>
+          <div class="chip" data-val="CRM (Bitrix24, amoCRM)" data-price="15000">CRM (Bitrix24, amo)</div>
+          <div class="chip" data-val="1С" data-price="20000">1С</div>
+          <div class="chip" data-val="Wildberries / Ozon" data-price="15000">Wildberries / Ozon</div>
+          <div class="chip" data-val="Нейросети (ChatGPT и др.)" data-price="15000">Нейросети</div>
+        </div>
+        <div class="nav">
+          <button class="btn btn-ghost" onclick="prev()">← Назад</button>
+          <button class="btn btn-main" onclick="next()">Дальше →</button>
+        </div>
+      </section>
+
+      <!-- ШАГ 5 -->
+      <section class="step" data-step="4">
+        <div class="eyebrow">Шаг 5 из 6</div>
+        <h2>Как быстро нужен результат?</h2>
+        <p class="hint">Срочные проекты беру в приоритет — это отражается в цене.</p>
+        <div class="slider-block">
+          <input type="range" id="q-speed" min="0" max="2" step="1" value="1" oninput="setSpeed(this.value)">
+          <div class="slider-labels">
+            <span>Не срочно<br>(3–4 недели)</span>
+            <span style="text-align:center">Обычный темп<br>(2–3 недели)</span>
+            <span style="text-align:right">Срочно 🔥<br>(до 2 недель)</span>
+          </div>
+        </div>
+        <div class="nav">
+          <button class="btn btn-ghost" onclick="prev()">← Назад</button>
+          <button class="btn btn-main" onclick="next()">Дальше →</button>
+        </div>
+      </section>
+
+      <!-- ШАГ 6 -->
+      <section class="step" data-step="5">
+        <div class="eyebrow">Шаг 6 из 6 · последний</div>
+        <h2>Куда прислать расчёт?</h2>
+        <p class="hint">Проверьте итог и оставьте контакт — я отвечу в течение рабочего дня.</p>
+
+        <div class="summary" id="summary"></div>
+
+        <div class="field">
+          <label for="f-name">Ваше имя *</label>
+          <input id="f-name" type="text" placeholder="Как к вам обращаться" autocomplete="name">
+          <div class="err-msg" id="e-name">Напишите имя</div>
+        </div>
+        <div class="field">
+          <label for="f-contact">Телеграм или телефон *</label>
+          <input id="f-contact" type="text" placeholder="@username или +7…" autocomplete="tel">
+          <div class="err-msg" id="e-contact">Оставьте контакт, иначе не смогу ответить</div>
+        </div>
+        <div class="field">
+          <label for="f-comment">Комментарий (по желанию)</label>
+          <textarea id="f-comment" placeholder="Всё, что важно знать о задаче своими словами"></textarea>
+        </div>
+
+        <div class="nav">
+          <button class="btn btn-ghost" onclick="prev()">← Назад</button>
+          <button class="btn btn-yellow" id="btn-send" onclick="send()">Отправить заявку</button>
+        </div>
+      </section>
+
+      <!-- УСПЕХ -->
+      <section class="step" data-step="6">
+        <div class="success">
+          <div class="big">✅</div>
+          <h2>Заявка отправлена на рассмотрение</h2>
+          <p>Спасибо! Я получила ваш бриф и уже смотрю его. Напишу вам в течение рабочего дня с точным расчётом и планом работ.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= КАЛЬКУЛЯТОР ================= -->
+    <aside class="calc" aria-live="polite">
+      <div class="eyebrow">Предварительная стоимость</div>
+      <div class="calc-price"><span class="from">от</span> <span id="calc-total">0 ₽</span></div>
+      <div class="calc-sub">Точная цена — после разбора задачи. Обычно ±15% от этой оценки.</div>
+      <div class="calc-lines" id="calc-lines">
+        <div class="calc-empty">Выбирайте варианты — цена посчитается сама, как в конструкторе.</div>
+      </div>
+      <div class="calc-badge">🔒 Предоплата 40% · договор · этапная сдача работ</div>
+    </aside>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   НАСТРОЙКА УВЕДОМЛЕНИЙ В TELEGRAM
+   ----------------------------------------------------------------
+   ВАЖНО ПРО БЕЗОПАСНОСТЬ: токен в HTML виден любому, кто откроет
+   исходный код страницы. Поэтому:
+   1) Заведи ОТДЕЛЬНОГО бота только для уведомлений (@BotFather),
+      НЕ используй токен рабочего бота.
+   2) Либо укажи вместо этого WEBHOOK_URL (Make.com / n8n / Google
+      Apps Script) — тогда токен вообще не попадает на страницу.
+      Если WEBHOOK_URL заполнен, отправка идёт через него.
+   ================================================================ */
+const TG_BOT_TOKEN = "8283419059:AAEjrBAZqPEokJSPEsFgOMGz9Ku7zs7MU74
+";      // токен отдельного бота-уведомлялки
+const TG_CHAT_ID   = "7861676794";    // твой chat_id (узнать: @userinfobot)
+const WEBHOOK_URL  = "";                        // необязательно: URL вебхука Make/n8n/Apps Script
+
+/* ---------------- Состояние ---------------- */
+const state = {
+  type: null, typePrice: 0,
+  tasks: [],            // {val, price}
+  have: null, havePrice: 0,
+  integr: [],
+  speed: 1              // 0 не срочно (-10%), 1 обычный, 2 срочно (+25%)
+};
+const SPEED = [
+  {label:"Не срочно (3–4 недели)", mult:0.9},
+  {label:"Обычный темп (2–3 недели)", mult:1},
+  {label:"Срочно, до 2 недель 🔥", mult:1.25}
+];
+let step = 0;
+const TOTAL_STEPS = 6;
+
+/* ---------------- Прогресс ---------------- */
+const progressEl = document.getElementById('progress');
+for(let i=0;i<TOTAL_STEPS;i++){progressEl.appendChild(document.createElement('i'))}
+function renderProgress(){
+  [...progressEl.children].forEach((el,i)=>el.classList.toggle('done', i<=Math.min(step,TOTAL_STEPS-1)));
+}
+
+/* ---------------- Навигация ---------------- */
+function show(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`.step[data-step="${n}"]`).classList.add('active');
+  step = n; renderProgress();
+  if(n===5) renderSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function next(){ if(step<TOTAL_STEPS-1) show(step+1) }
+function prev(){ if(step>0) show(step-1) }
+renderProgress();
+
+/* ---------------- Одиночный выбор ---------------- */
+function singleSelect(containerId, cb){
+  const box = document.getElementById(containerId);
+  box.querySelectorAll('.opt').forEach(o=>{
+    o.addEventListener('click',()=>{
+      box.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
+      o.classList.add('sel');
+      cb(o.dataset.val, Number(o.dataset.price));
+    });
+  });
+}
+singleSelect('q-type',(v,p)=>{ state.type=v; state.typePrice=p;
+  document.getElementById('btn-1').disabled=false; calc(); });
+singleSelect('q-have',(v,p)=>{ state.have=v; state.havePrice=p;
+  document.getElementById('btn-3').disabled=false; calc(); });
+
+/* ---------------- Мультивыбор ---------------- */
+function multiSelect(containerId, arrKey){
+  document.getElementById(containerId).querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      c.classList.toggle('sel');
+      const item = {val:c.dataset.val, price:Number(c.dataset.price)};
+      const arr = state[arrKey];
+      const idx = arr.findIndex(x=>x.val===item.val);
+      idx>=0 ? arr.splice(idx,1) : arr.push(item);
+      calc();
+    });
+  });
+}
+multiSelect('q-tasks','tasks');
+multiSelect('q-integr','integr');
+
+function setSpeed(v){ state.speed=Number(v); calc(); }
+
+/* ---------------- Калькулятор ---------------- */
+const fmt = n => n.toLocaleString('ru-RU') + ' ₽';
+function calc(){
+  const lines = [];
+  let sum = 0;
+  if(state.type){ lines.push([state.type, state.typePrice]); sum += state.typePrice; }
+  state.tasks.forEach(t=>{ if(t.price>0){ lines.push([t.val, t.price]); sum += t.price; }});
+  state.integr.forEach(t=>{ lines.push(['Интеграция: '+t.val, t.price]); sum += t.price; });
+  if(state.havePrice<0 && sum>0){ lines.push(['Доработка готового', state.havePrice]); sum += state.havePrice; }
+  const mult = SPEED[state.speed].mult;
+  if(sum>0 && mult!==1){
+    const delta = Math.round(sum*(mult-1)/1000)*1000;
+    lines.push([mult>1?'Срочность 🔥':'Скидка за гибкие сроки', delta]);
+    sum += delta;
+  }
+  sum = Math.max(sum,0);
+  document.getElementById('calc-total').textContent = fmt(sum);
+  const box = document.getElementById('calc-lines');
+  box.innerHTML = lines.length
+    ? lines.map(([n,v])=>`<div class="calc-line"><span class="n">${n}</span><span class="v">${v<0?'−':''}${fmt(Math.abs(v))}</span></div>`).join('')
+    : '<div class="calc-empty">Выбирайте варианты — цена посчитается сама, как в конструкторе.</div>';
+  return sum;
+}
+
+/* ---------------- Итог ---------------- */
+function renderSummary(){
+  const rows = [
+    ['Что делаем', state.type||'—'],
+    ['Задачи', state.tasks.map(t=>t.val).join(', ')||'—'],
+    ['Что уже есть', state.have||'—'],
+    ['Интеграции', state.integr.map(t=>t.val).join(', ')||'нет'],
+    ['Сроки', SPEED[state.speed].label],
+    ['Оценка', 'от '+fmt(calc())]
+  ];
+  document.getElementById('summary').innerHTML =
+    rows.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+}
+
+/* ---------------- Отправка ---------------- */
+function validate(){
+  let ok = true;
+  [['f-name','e-name'],['f-contact','e-contact']].forEach(([f,e])=>{
+    const inp=document.getElementById(f), err=document.getElementById(e);
+    const bad = !inp.value.trim();
+    inp.classList.toggle('err',bad);
+    err.style.display = bad?'block':'none';
+    if(bad) ok=false;
+  });
+  return ok;
+}
+
+async function send(){
+  if(!validate()) return;
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Отправляю…';
+
+  const total = calc();
+  const text =
+`🆕 НОВАЯ ЗАЯВКА С БРИФА
+
+👤 ${document.getElementById('f-name').value.trim()}
+📱 ${document.getElementById('f-contact').value.trim()}
+
+🎯 Что: ${state.type||'—'}
+📌 Задачи: ${state.tasks.map(t=>t.val).join(', ')||'—'}
+📦 Уже есть: ${state.have||'—'}
+🔗 Интеграции: ${state.integr.map(t=>t.val).join(', ')||'нет'}
+⏱ Сроки: ${SPEED[state.speed].label}
+💰 Оценка калькулятора: от ${fmt(total)}
+
+💬 Комментарий: ${document.getElementById('f-comment').value.trim()||'—'}`;
+
+  try{
+    if(WEBHOOK_URL){
+      await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({text, state, total})});
+    }else{
+      const r = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id:TG_CHAT_ID, text})
+      });
+      if(!r.ok) throw new Error('TG error');
+    }
+    show(6);
+  }catch(e){
+    btn.disabled=false;
+    btn.textContent='Отправить заявку';
+    alert('Не получилось отправить. Проверьте интернет и попробуйте ещё раз — или напишите мне напрямую в Telegram.');
+  }
+}
+</script>
+</body>
+</html>
